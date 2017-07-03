@@ -1,0 +1,153 @@
+﻿android 中的计时器：handler    timer
+http://blog.csdn.net/zuolongsnail/article/details/8168689
+第二种方法:Handler的postDelay()方法
+final Runnable runnable = new Runnable() {
+   @Override
+   public void run() {
+    if (isStart2) {
+     mHandler.sendEmptyMessage(0);
+     mHandler.postDelayed(this, 1000);
+    }
+   }
+  };
+mHandler.postDelayed(runnable, 1000);
+  }
+
+第三种:Timer和TimerTask
+ private Timer timer = new Timer();
+ private TimerTask timerTask = new TimerTask() {
+  @Override
+  public void run() {
+   mHandler.sendEmptyMessage(0);
+  }
+ };
+ timer.schedule(timerTask, 1000, 1000);
+ 
+ 
+ android 多进程的实现和问题：http://blog.csdn.net/goodlixueyong/article/details/49853079
+第一种形式如 android:process=":remote"，以冒号开头，冒号后面的字符串原则上是可以随意指定的。如果我们的包名为“com.example.processtest”，则实际的进程名为“com.example.processtest:remote”。这种设置形式表示该进程为当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程中。
+第二种情况如 android:process="com.example.processtest.remote"，以小写字母开头，表示运行在一个以这个名字命名的全局进程中，其他应用通过设置相同的ShareUID可以和它跑在同一个进程。
+出现的问题：
+ 1）Application的多次重建。
+2）静态成员的失效。
+3）文件共享问题。
+4）断点调试问题。
+ 
+
+StringBuilder：线程非安全的
+StringBuffer：线程安全的
+
+
+
+android 布局优化：
+include
+merge
+viewstub
+SpannableStringBuilder 避免多写textview
+空白用space控件
+避免嵌套 linearlayout  relativelayout   onmeasure   两次   linearlayout也有weight时也会俩次
+
+内存优化：
+https://mp.weixin.qq.com/s?__biz=MzI0NTcxNTg5Mg==&mid=2247483925&idx=1&sn=7ec5b384d3c44ba57bbfc6e68d26a8df&pass_ticket=LvcvfsxWBh14Dnj%2BMgezgVr4ngSB3zoUc%2Bj9v%2BAtPq5ssPF4A%2FJUHDc2fc8s02L9
+
+
+属性动画http://blog.csdn.net/guolin_blog/article/details/43536355
+属性动画的运行机制是通过不断地对值进行操作来实现的，而初始值和结束值之间的动画过渡就是由ValueAnimator这个类来负责计算的。它的内部使用一种时间循环的机制来计算值与值之间的动画过渡，我们只需要将初始值和结束值提供给ValueAnimator，并且告诉它动画所需运行的时长，那么ValueAnimator就会自动帮我们完成从初始值平滑地过渡到结束值这样的效果。
+ValueAnimator anim = ValueAnimator.ofFloat(0f, 5f, 3f, 10f);  
+anim.setDuration(5000);  
+anim.start();  
+ObjectAnimator它是可以直接对任意对象的任意属性进行动画操作的，比如说View的alpha属性。
+ObjectAnimator animator = ObjectAnimator.ofFloat(textview, "rotation", 0f, 360f);  
+animator.setDuration(5000);  
+animator.start();  
+
+TypeEvaluator的作用到底是什么呢？简单来说，就是告诉动画系统如何从初始值过度到结束值
+FloatEvaluator实现了TypeEvaluator接口，然后重写evaluate()方法。evaluate()方法当中传入了三个参数，第一个参数fraction非常重要，这个参数用于表示动画的完成度的，我们应该根据它来计算当前动画的值应该是多少，第二第三个参数分别表示动画的初始值和结束值。
+  ValueAnimator anim = ValueAnimator.ofObject(new PointEvaluator(), startPoint, endPoint);  
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {  
+            @Override  
+            public void onAnimationUpdate(ValueAnimator animation) {  
+                currentPoint = (Point) animation.getAnimatedValue();  
+                invalidate();  
+            }  
+        });  
+        anim.setDuration(5000);  
+        anim.start();  
+		
+		
+android 5.0 新特性：
+Material Design   
+toolBar    
+drawerlayout    
+按钮的水波纹反馈   
+recycleView   
+cardView   
+swiperefreshLayout
+转场动画：http://blog.csdn.net/u012702547/article/details/51289789
+旧
+startActivity(new Intent(this, Main3Activity.class));  
+overridePendingTransition(R.anim.in,R.anim.out); 
+新：1种就是分解、滑动进入、淡入淡出，另外一种就是共享元素动画
+1.分解、滑动进入、淡入淡出
+startActivity(new Intent(this, Main2Activity.class), ActivityOptions.makeSceneTransitionAnimation(this).toBundle());  
+getWindow().setEnterTransition(new Explode().setDuration(2000));  
+getWindow().setExitTransition(new Explode().setDuration(2000)); 
+
+
+android 6.0 新特性：
+动态权限
+Android6.0移除了HttpClient,建议用HttpURLConnection替代。
+
+android 7.0 新特性：
+私有文件的文件权限不在放权给所有的应用，使用 MODE_WORLD_READABLE 或 MODE_WORLD_WRITEABLE 进行的操作将触发 SecurityException
+StrictMode API 政策禁  应用间共享文件使用FileProvider
+安卓为了提高后台的性能，去掉了网络改变广播的静态注册方式（同时去除的还有拍照广播和录视频广播
+
+json的gson使用
+Gson gson = new Gson();
+List<Student> students = gson.fromJson(json3, new TypeToke<List<Student>>(){}.getType);
+
+android异步消息处理机制http://blog.csdn.net/lmj623565791/article/details/38377229/
+1、首先Looper.prepare()在本线程中保存一个Looper实例，然后该实例中保存一个MessageQueue对象；因为Looper.prepare()在一个线程中只能调用一次，所以MessageQueue在一个线程中只会存在一个。
+2、Looper.loop()会让当前线程进入一个无限循环，不端从MessageQueue的实例中读取消息，然后回调msg.target.dispatchMessage(msg)方法。
+3、Handler的构造方法，会首先得到当前线程中保存的Looper实例，进而与Looper实例中的MessageQueue想关联。
+4、Handler的sendMessage方法，会给msg的target赋值为handler自身，然后加入MessageQueue中。
+5、在构造Handler实例时，我们会重写handleMessage方法，也就是msg.target.dispatchMessage(msg)最终调用的方法。
+好了，总结完成，大家可能还会问，那么在Activity中，我们并没有显示的调用Looper.prepare()和Looper.loop()方法，为啥Handler可以成功创建呢，这是因为在Activity的启动代码中，已经在当前UI线程调用了Looper.prepare()和Looper.loop()方法。
+
+android 缓存   http://blog.csdn.net/shakespeare001/article/details/51695358
+内存缓存
+磁盘缓存
+
+
+hashmap的原理，即hash冲突的解决
+http://www.cnblogs.com/zhousysu/p/5483932.html
+
+
+java 操作：
+二分查找
+   public static int binarySearch(int[] srcArray, int des){   
+      
+        int low = 0;   
+        int high = srcArray.length-1;   
+        while(low <= high) {   
+            int middle = (low + high)/2;   
+            if(des == srcArray[middle]) {   
+                return middle;   
+            }else if(des <srcArray[middle]) {   
+                high = middle - 1;   
+            }else {   
+                low = middle + 1;   
+            }  
+        }  
+        return -1;  
+   }  
+        
+
+view绘制流程：http://blog.csdn.net/singwhatiwanna/article/details/38426471
+
+
+mode共有三种情况，取值分别为MeasureSpec.UNSPECIFIED, MeasureSpec.EXACTLY, MeasureSpec.AT_MOST。
+MeasureSpec.EXACTLY是精确尺寸，当我们将控件的layout_width或layout_height指定为具体数值时如andorid:layout_width="50dip"，或者为FILL_PARENT是，都是控件大小已经确定的情况，都是精确尺寸。
+MeasureSpec.AT_MOST是最大尺寸，当控件的layout_width或layout_height指定为WRAP_CONTENT时，控件大小一般随着控件的子空间或内容进行变化，此时控件尺寸只要不超过父控件允许的最大尺寸即可。因此，此时的mode是AT_MOST，size给出了父控件允许的最大尺寸。
+MeasureSpec.UNSPECIFIED是未指定尺寸，这种情况不多，一般都是父控件是AdapterView，通过measure方法传入的模式。

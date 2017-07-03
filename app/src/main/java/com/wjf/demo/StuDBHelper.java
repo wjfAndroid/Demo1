@@ -9,7 +9,6 @@ import android.util.Log;
 /**
  * Created by qifan on 2017/7/1.
  */
-
 public class StuDBHelper extends SQLiteOpenHelper {
     private static final String TAG = "TestSQLite";
     public static final int VERSION = 1;

@@ -123,6 +123,7 @@ public class SqlActivity extends Activity {
         String insert = "insert into  stu2(name,age,books) values('kkk',22,'gggggg')";
         db.execSQL(insert);
         db.close();
+
     }
 
     public void onsearch3(View view) {
